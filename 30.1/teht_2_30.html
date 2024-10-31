@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Management</title>
+</head>
+<body>
+    <h1>Tilavaraus Database</h1>
+
+    <!-- Table Selection -->
+    <label for="table-select">Select Table:</label>
+    <select id="table-select" onchange="fetchData()">
+        <option value="tilat">tilat</option>
+        <option value="varaajat">Varaajat</option>
+        <option value="varaukset">Varaukset</option>
+    </select>
+
+    <!-- Data Table -->
+    <h2>Table Contents</h2>
+    <table border="1" id="data-table">
+        <thead id="table-headers"></thead>
+        <tbody></tbody>
+    </table>
+
+    <!-- Add Record Form -->
+    <h2>Lisää uusia</h2>
+    <form id="add-form" onsubmit="addRecord(event)">
+        <div id="form-fields"></div>
+        <button type="submit">Add Record</button>
+    </form>
+
+    <script>
+        // Fetches data based on selected table
+        function fetchData() {
+            const table = document.getElementById('table-select').value;
+            fetch(`database_handler.php?action=view&table=${table}`)
+                .then(response => response.json())
+                .then(data => renderTable(data, table));
+        }
+
+        // Renders table headers and rows based on data received
+        function renderTable(data, table) {
+            const tableHeaders = document.getElementById('table-headers');
+            const tableBody = document.querySelector('#data-table tbody');
+            tableHeaders.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) return;
+
+            // Create headers dynamically
+            const headers = Object.keys(data[0]);
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            headerRow.appendChild(document.createElement('th')).textContent = "Delete"; // Add delete column
+            tableHeaders.appendChild(headerRow);
+
+            // Populate rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header];
+                    tr.appendChild(td);
+                });
+                const deleteCell = document.createElement('td');
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => deleteRecord(table, row.id);
+                deleteCell.appendChild(deleteButton);
+                tr.appendChild(deleteCell);
+                tableBody.appendChild(tr);
+            });
+
+            // Configure form fields based on selected table
+            configureFormFields(table);
+        }
+
+        // Configure form fields for adding new records
+        function configureFormFields(table) {
+            const formFields = document.getElementById('form-fields');
+            formFields.innerHTML = ''; // Clear previous fields
+
+            if (table === 'tilat') {
+                formFields.innerHTML = `
+                    <label>Room Name: <input type="text" name="tilan_nimi"></label><br>
+                `;
+            } else if (table === 'varaajat') {
+                formFields.innerHTML = `
+                    <label>Name: <input type="text" name="nimi"></label><br>
+                `;
+            } else if (table === 'varaukset') {
+                formFields.innerHTML = `
+                    <label>Tila ID: <input type="number" name="tila"></label><br>
+                    <label>Varaaja ID: <input type="number" name="varaaja"></label><br>
+                    <label>Varaus paivalle: <input type="date" name="varauspaiva"></label><br>
+                `;
+            }
+        }
+
+        // Add record via form submission
+        function addRecord(event) {
+            event.preventDefault();
+            const table = document.getElementById('table-select').value;
+            const formData = new FormData(document.getElementById('add-form'));
+
+            fetch(`database_handler.php?action=add&table=${table}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+                fetchData(); // Refresh data
+            });
+        }
+
+        // Delete a record by ID
+        function deleteRecord(table, id) {
+            fetch(`database_handler.php?action=delete&table=${table}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `id=${id}`
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+                fetchData(); // Refresh data
+            });
+        }
+
+        // Initial load
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
