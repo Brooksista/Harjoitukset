@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tilat, Varaajat, and Varaukset Manager</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Manage Tilat, Varaajat, and Varaukset</h1>
+
+    <section>
+        <h2>Tilat</h2>
+        <ul id="tilat-list"></ul>
+        <input type="text" id="tilat-name" placeholder="Enter Tilat Name">
+        <button onclick="addTilat()">Add Tilat</button>
+    </section>
+
+    <section>
+        <h2>Varaajat</h2>
+        <ul id="varaajat-list"></ul>
+        <input type="text" id="varaajat-name" placeholder="Enter Varaajat Name">
+        <button onclick="addVaraajat()">Add Varaaja</button>
+    </section>
+
+    <section>
+        <h2>Varaukset</h2>
+        <ul id="varaukset-list"></ul>
+        <input type="number" id="varaukset-tila-id" placeholder="Enter Tila ID">
+        <input type="number" id="varaukset-varaaja-id" placeholder="Enter Varaaja ID">
+        <input type="date" id="varaukset-date" placeholder="Enter Date">
+        <button onclick="addVaraus()">Add Varaus</button>
+    </section>
+
+    <script src="index.js"></script>
+</body>
+</html>
